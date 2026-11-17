@@ -130,11 +130,29 @@ def programs():
             box(MID-1,0,0,MID+1,0,MID,'accent')
             box(MID-3,1,0,MID+3,E(4),3,'wall');box(MID-1,1,0,MID+1,3,3,'air');box(MID-1,1,1,MID+1,3,1,'iron_bars')
             box(MID-4,E(4)+1,0,MID+4,E(4)+1,4,'trim')
-            house(E(3),E(5),E(3),E(5),1,E(5),MID,4)
-            for xx in [E(3)+2,E(5)-2]:
-                for zz in [E(3),E(5)]:
-                    box(xx,E(3),zz,xx,E(4),zz,'glass');point(xx,E(3)-1,zz,'trim')
-            box(MID-1,1,E(3),MID+1,3,E(3),'air')
+            x,X,z,Z=E(3)-1,E(5)+1,E(3)+1,E(6)
+            box(x,0,z,X,E(6),Z,'wall');box(x+1,1,z+1,X-1,E(6)-1,Z-1,'air')
+            box(x,0,z,X,0,Z,'wall');box(x,E(3),z,X,E(3),Z,'wall')
+            for xx in [x,X]:
+                for zz in [z,Z]: box(xx,1,zz,xx,E(6)-1,zz,'texture')
+            for yy in [E(2),E(4)+1]:
+                for xx in [E(3)+1,MID,E(5)-1]:
+                    for zz in [z,Z]:
+                        box(xx,yy,zz,xx,yy+1,zz,'glass');point(xx,yy-1,zz,'trim')
+                for zz in [z+2,Z-2]:
+                    for xx in [x,X]:
+                        box(xx,yy,zz,xx,yy+1,zz,'glass');point(xx,yy-1,zz,'trim')
+            ring(x,E(3),z,X,E(3),Z,'accent')
+            ring(x-1,E(6),z-1,X+1,E(6),Z+1,'accent')
+            for i in range(4):
+                box(x-1,E(6)+1+i,z-1+i,X+1,E(6)+1+i,Z+1-i,'roof')
+                for xx in [x,X]: box(xx,E(6)+i,z+i,xx,E(6)+i,Z-i,'wall')
+                box(x-1,E(6)+1+i,z-1+i,X+1,E(6)+1+i,z-1+i,'stair_south')
+                box(x-1,E(6)+1+i,Z+1-i,X+1,E(6)+1+i,Z+1-i,'stair_north')
+            box(x-1,E(6)+5,MID+2,X+1,E(6)+5,MID+2,'ridge')
+            point(MID,1,z,'oak_door[half=lower,facing=north]');point(MID,2,z,'oak_door[half=upper,facing=north]')
+            for xx in [MID-1,MID+1]: box(xx,1,z,xx,3,z,'accent')
+            box(MID-1,3,z,MID+1,3,z,'accent')
             box(MID-2,4,0,MID+2,4,0,'accent');point(MID,5,0,'accent')
             for xx in [MID-3,MID+3]:
                 box(xx-1,E(4)+2,0,xx+1,E(4)+2,3,'accent');point(xx,E(4)+3,1,'light')
@@ -157,14 +175,12 @@ def programs():
             for xx in [5,END-5]: point(xx,3,MID,'sea_lantern')
             for i in range(3): box(MID-1,i,i,MID+1,i,i,'stair_north')
         else:
-            point(MID,0,MID,'stone')
-            box(MID-2,E(4)+1,MID-2,MID+2,E(4)+2,MID+2,'air')
-            box(MID-2,E(4),MID-2,MID+2,E(4),MID+2,'grass_block')
-            box(MID, E(4),MID,MID,END-1,MID,'oak_log[axis=y]')
-            box(MID-2,END-2,MID-1,MID+2,END-2,MID+1,'oak_leaves[persistent=true]')
-            box(MID-1,END-2,MID-2,MID+1,END-2,MID+2,'oak_leaves[persistent=true]')
-            box(MID-1,END-1,MID-1,MID+1,END-1,MID+1,'oak_leaves[persistent=true]')
-            box(MID-1,END,MID-1,MID+1,END,MID+1,'oak_leaves[persistent=true]')
+            box(MID,E(4)+1,MID,MID,E(6)+1,MID,'oak_log[axis=y]')
+            box(MID-2,E(6)+2,MID-1,MID+2,E(6)+2,MID+1,'oak_leaves[persistent=true]')
+            box(MID-1,E(6)+2,MID-2,MID+1,E(6)+2,MID+2,'oak_leaves[persistent=true]')
+            box(MID-1,E(6)+3,MID-1,MID+1,E(6)+3,MID+1,'oak_leaves[persistent=true]')
+            box(MID-1,E(6)+4,MID,MID+1,E(6)+4,MID,'oak_leaves[persistent=true]')
+            box(MID,E(6)+4,MID-1,MID,E(6)+4,MID+1,'oak_leaves[persistent=true]')
         result.append(p)
     return result
 
@@ -188,7 +204,6 @@ def raw_commands(mx=12,mz=12,my=8,seed=1,flags=0):
     if min(mx,mz,my)<8:
         yield line((0,0,0,mx-1,0,mz-1),'wall');yield 'DONE\n';return
     if arch==4:
-        terrain_seed=rng
         for x in range(mx):
             z=0
             while z<mz:
@@ -197,13 +212,13 @@ def raw_commands(mx=12,mz=12,my=8,seed=1,flags=0):
                 if d>=4:
                     z+=1
                     continue
-                top=min(my-1,(my-1)//2+((terrain_seed^(x>>3)^(z>>3))&1))
-                bottom=min(top,(dx+dz)//2)
+                top=(my-1)//2-(d>=3)
+                bottom=min(top,(max(dx,dz)+1)//2)
                 end=z
                 while end+1<mz:
                     D=dx*8//mx+abs(end+1-(mz-1)//2)*8//mz
-                    T=min(my-1,(my-1)//2+((terrain_seed^(x>>3)^((end+1)>>3))&1))
-                    if D>=4 or T!=top or min(T,(dx+abs(end+1-(mz-1)//2))//2)!=bottom:break
+                    T=(my-1)//2-(D>=3)
+                    if D>=4 or T!=top or min(T,(max(dx,abs(end+1-(mz-1)//2))+1)//2)!=bottom:break
                     end+=1
                 rng=lfsr(rng)
                 yield line((x,bottom,z,x,top,end),'stone')

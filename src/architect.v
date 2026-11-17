@@ -38,7 +38,6 @@ module tt_um_astryon_voxel_architect #(
  reg [1:0] digit;
  reg [7:0] ix,iz,top,bottom;
  reg [7:0] run_first,run_last;
- reg [15:0] terrain_seed;
  reg terrain;
  reg [1:0] layer;
  reg [2:0] depth;
@@ -53,9 +52,10 @@ module tt_um_astryon_voxel_architect #(
    ({3'b0,distz}<<3)>=({3'b0,zmax}+1'b1)*2?3'd2:
    ({3'b0,distz}<<3)>=({3'b0,zmax}+1'b1)?3'd1:3'd0;
  wire [3:0] island_depth={1'b0,depthx}+{1'b0,depthz};
- wire [7:0] candidate_top=(ymax>>1)+{7'b0,(terrain_seed[0]^ix[3]^iz[3])};
- wire [8:0] island_distance={1'b0,distx}+{1'b0,distz};
- wire [7:0] candidate_bottom=island_distance[8:1]>candidate_top?candidate_top:island_distance[8:1];
+ wire [7:0] candidate_top=(ymax>>1)-(island_depth>=3?8'd1:8'd0);
+ wire [7:0] island_distance=distx>distz?distx:distz;
+ wire [7:0] cone_bottom={1'b0,island_distance[7:1]}+{7'd0,island_distance[0]};
+ wire [7:0] candidate_bottom=cone_bottom>candidate_top?candidate_top:cone_bottom;
  wire [15:0] next_rng={rng[14:0],rng[15]^rng[13]^rng[12]^rng[10]};
  localparam IDLE=0,INIT=1,FETCH=2,EVAL=3,CLIP=4,CHECK=5,PREFIX=6,TILDE=7,
   DEC_INIT=8,DEC_H=9,DEC_T=10,DEC_OUT=11,SPACE=12,NAME=13,NL=14,NEXT=15,
@@ -93,7 +93,7 @@ module tt_um_astryon_voxel_architect #(
    startmeta<=0;startsync<=0;startlast<=0;counter<=0;rng<=1;busy<=0;done<=0;
    archetype<=0;palette<=0;xmax<=0;ymax<=0;zmax<=0;pc<=0;axis<=0;expr<=0;value<=0;
    block<=0;state<=IDLE;single<=0;pos<=0;coord<=0;remainder<=0;hundreds<=0;tens<=0;digit<=0;
-   ix<=0;iz<=0;top<=0;bottom<=0;layer<=0;depth<=0;run_first<=0;run_last<=0;terrain_seed<=1;terrain<=0;
+   ix<=0;iz<=0;top<=0;bottom<=0;layer<=0;depth<=0;run_first<=0;run_last<=0;terrain<=0;
    xsum<=0;ysum<=0;zsum<=0;param_index<=0;
    for(i=0;i<6;i=i+1) begin bounds[i]<=0;whole[i]<=0;end
    for(i=0;i<9;i=i+1) begin xparam[i]<=0;yparam[i]<=0;zparam[i]<=0;end
@@ -117,7 +117,7 @@ module tt_um_astryon_voxel_architect #(
      end
     end
     INIT:begin
-     terrain<=archetype==4&&xmax>=7&&ymax>=7&&zmax>=7;terrain_seed<=rng;
+     terrain<=archetype==4&&xmax>=7&&ymax>=7&&zmax>=7;
      pc<=first_pc(archetype);axis<=0;ix<=0;iz<=0;layer<=0;
      xsum<=0;ysum<=0;zsum<=0;param_index<=0;
      if(xmax<7||ymax<7||zmax<7) begin

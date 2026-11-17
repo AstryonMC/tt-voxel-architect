@@ -63,7 +63,7 @@ def render(text,dims,path,title):
                     if block=='torch' and (dx!=1 or dz!=1 or dy==3):continue
                     fine[x*4+dx,y*4+dy,dims[1]*4-1-(z*4+dz)]=block
     grid=fine
-    tilt=.2 if title=='isla' else .42
+    tilt=.07 if title=='isla' else .42
     projected=[(x-z,(x+z)*tilt-y) for x,y,z in grid]
     lo=min(v[0] for v in projected);hi=max(v[0] for v in projected)
     low=min(v[1] for v in projected);high=max(v[1] for v in projected)

@@ -15,6 +15,42 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(grid[10,6,10],'oak_log[axis=y]')
         self.assertEqual(grid[10,9,10],'oak_leaves[persistent=true]')
 
+    def test_stone_keep(self):
+        grid,_=validate(stream(*DEFAULTS[2],1,2),DEFAULTS[2])
+        for y in [2,7,11]:
+            self.assertEqual(grid[8,y,14],'stone_bricks')
+            self.assertEqual(grid[12,y,18],'stone_bricks')
+        self.assertEqual(grid[12,6,14],'stone_bricks')
+        for y in [4,5,9,10]: self.assertEqual(grid[10,y,10],'glass_pane')
+        self.assertEqual(grid[10,3,10],'stone_brick_slab[type=top]')
+        self.assertEqual(grid[7,12,14],'chiseled_stone_bricks')
+        self.assertIn('oak_door',grid[12,1,10])
+        self.assertEqual(grid[12,0,7],'chiseled_stone_bricks')
+        self.assertNotIn((12,1,7),grid)
+        self.assertIn('stairs',grid[7,13,9])
+
+    def test_island_profile(self):
+        for height,layers in [(10,{8:21,9:9}),(14,{11:21,12:9,13:5})]:
+            grid,count=validate(stream(22,22,height,1,4),(22,22,height))
+            self.assertLessEqual(count,400)
+            ground=(height-1)//2
+            self.assertEqual(grid[10,ground,10],'grass_block')
+            trunk=list(range(ground+1,(height-1)*6//8+2))
+            self.assertGreaterEqual(len(trunk),3)
+            for y in trunk: self.assertEqual(grid[10,y,10],'oak_log[axis=y]')
+            leaves={y:sum(b.startswith('oak_leaves') and pos[1]==y for pos,b in grid.items()) for y in layers}
+            self.assertEqual(leaves,layers)
+            bottoms={}
+            for (x,y,z),b in grid.items():
+                if b=='stone': bottoms[x,z]=min(y,bottoms.get((x,z),y))
+            self.assertEqual(bottoms[10,10],0)
+            self.assertEqual(bottoms[11,10],1)
+            self.assertEqual(bottoms[13,10],2)
+            self.assertEqual(grid[10,ground-1,10],'dirt')
+            self.assertEqual(sum(y==0 for y in bottoms.values()),1)
+            tops={pos[1] for pos,b in grid.items() if b=='grass_block'}
+            self.assertEqual(tops,{ground-1,ground})
+
     def test_fill_limit(self):
         for a in range(5):
             validate(stream(255,255,255,1,a),(255,255,255),voxelize=False)
