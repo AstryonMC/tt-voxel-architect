@@ -9,7 +9,7 @@ formatter and a UART generate the byte stream.
 Five archetypes: casa (house), spawn (monumental plaza), castillo (castle), templo (temple),
 isla (floating island). Four palettes: medieval stone/oak, desert sandstone, ocean
 prismarine, dark/spruce. Details include directional stair roofs and slab ridges, log
-frames, glazing, furniture, column capitals, battlements, lamps and per-column terrain noise.
+frames, glazing, furniture, column capitals, battlements, lamps and coarse terrain variation.
 
 Inputs RX and START have two-flop synchronizers; reset is synchronous active-low. The
 UART midpoint-samples eight data bits and checks the stop bit. Default divisor is 572
@@ -18,7 +18,12 @@ one), wraps seeds to 16 bits and discards malformed/busy lines through LF. INIT 
 maximum coordinates and configuration. A nine-cycle parameter unit precomputes all eighth
 fractions by repeated addition into a small register file. Six ROM expressions per box
 select these fractions, add a signed offset and register the result. Motif repeats are compiler
-unrolled, while island columns use a runtime nested loop. A seeded LFSR supplies texture.
+unrolled, while island columns use a runtime nested loop that merges equal-height Z runs.
+Grass variation uses eight-block patches; Manhattan distance tapers the underside toward
+the center. A seeded LFSR supplies architectural texture.
+Before formatting, each box is partitioned into disjoint tiles of at most 32 blocks on
+each axis, guaranteeing at most 32,768 blocks per `/fill` without multipliers or dividers.
+All tiles of one box complete before the next microinstruction changes the material/RNG.
 The decimal formatter repeatedly subtracts 100 and 10 and suppresses leading zeroes.
 Ready/valid backpressure holds characters until UART accepts them. Done asserts only
 after the last newline stop bit. No large combinational dividers are used.
@@ -72,13 +77,14 @@ Run test commands from the repository root except `make`, which runs in `test/`.
 UART build at production clock/baud without internal hierarchical probes.
 
 Previews in `docs/img/` are schematic voxel-color isometric drawings, not Minecraft
-screenshots. Stair directions and slab halves use half-voxel geometry; panes, doors and
-furniture use simplified proxies. Water flow and support physics
+screenshots. A quarter-block grid shows stair treads, slab halves, thin panes/doors and
+small lantern bodies; furniture uses simplified proxies. The island uses a lower camera
+angle to reveal its underside. Water flow and support physics
 are not simulated. In-game appearance still needs checking.
 
-Local hardening uses ignored `tt/` cloned from tt-support-tools and LibreLane 3.0.14:
-`python tt/tt_tool.py --create-user-config --harden`. Docker is required. The period is
-15.151515 ns rather than the template's 20 ns. See `docs/verification.md` for results.
+Hardening runs in the PR's GitHub Actions `gds` job, not locally on the two-core development
+box. The period is 15.151515 ns rather than the template's 20 ns; the tile request remains
+4x2 pending CI physical implementation. See `docs/verification.md` for results.
 
 ## External hardware
 

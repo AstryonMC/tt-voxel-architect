@@ -10,6 +10,17 @@ BUILD 12 12 8 1 0
 The chip replies with ordered `/fill` and `/setblock` commands, then `DONE`.
 Five architectural programs × four material palettes; seeded texture and floating terrain.
 
+Every box is streamed as disjoint tiles no larger than **32 × 32 × 32** (32,768 blocks),
+including maximum-size builds. This respects Minecraft Java's default `/fill` limit
+without changing the world's `commandModificationBlockLimit`. Tile ordering preserves
+the original coarse-to-fine overwrite order.
+
+The quality round raises house walls before the gable starts, seats the castle keep's roof
+on its hall, adds column capitals and a trimmed temple pediment, and merges equal-height
+island terrain runs. Default palette-0 command counts: **77 / 54 / 244 / 51 / 365** for
+casa / spawn / castillo / templo / isla. The island has a smooth coarse-height top, a
+tapered stone underside and a separate log-and-layered-leaf tree.
+
 | Casa | Spawn |
 |---|---|
 | ![House](docs/img/casa.png) | ![Plaza](docs/img/spawn.png) |
@@ -39,3 +50,8 @@ python -m unittest discover -s model -p 'test_*.py'
 Run `make` in `test/` for the fast regression; `make REAL=yes` for a short complete build
 at 66 MHz / 115200 baud. `make GATES=yes` uses the gate-level netlist supplied by TT CI.
 The official template's GDS, test, documentation and FPGA workflows are retained.
+Maximum 255³ builds for every archetype are validated without allocating a voxel grid;
+physical-UART regressions compare a full 255³ house, a 255×255 platform and a 40³ house.
+See [verification results](docs/verification.md) for synthesis comparisons and limitations.
+Hardening is delegated to the PR's GitHub Actions `gds` job; do not start local hardening
+on the two-core development box.

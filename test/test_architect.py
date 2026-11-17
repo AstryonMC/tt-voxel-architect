@@ -66,6 +66,14 @@ async def serial_model_comparison(d):
     await build(d,'  BUILD   9  10  8  0   48  \r\n',(9,10,8,0,48))
     text=await build(d,'BUILD 255 255 1 1 0\n',(255,255,1,1,0))
     validate(text,(255,255,1),voxelize=False)
+    text=await build(d,'BUILD 40 40 40 1 0\n',(40,40,40,1,0))
+    validate(text,(40,40,40),voxelize=False)
+
+@cocotb.test(skip=REAL)
+async def maximum_build(d):
+    await reset(d)
+    text=await build(d,'BUILD 255 255 255 1 0\n',(255,255,255,1,0))
+    validate(text,(255,255,255),voxelize=False)
 
 @cocotb.test(skip=REAL)
 async def parser_and_start(d):
