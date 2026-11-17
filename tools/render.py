@@ -65,8 +65,8 @@ def render(text,dims,path,title):
     grid=fine
     tilt=.07 if title=='isla' else .42
     projected=[(x-z,(x+z)*tilt-y) for x,y,z in grid]
-    lo=min(v[0] for v in projected);hi=max(v[0] for v in projected)
-    low=min(v[1] for v in projected);high=max(v[1] for v in projected)
+    lo=min((v[0] for v in projected),default=0);hi=max((v[0] for v in projected),default=0)
+    low=min((v[1] for v in projected),default=0);high=max((v[1] for v in projected),default=0)
     scale=min(780/(hi-lo+2),620/(high-low+2));sy=scale*tilt
     origin=(480-(hi+lo)*scale/2,465-(high+low)*scale/2)
     def proj(x,y,z):return (origin[0]+(x-z)*scale,origin[1]+(x+z)*sy-y*scale)
@@ -83,6 +83,7 @@ def render(text,dims,path,title):
             d.polygon([proj(*v) for v in vertices],fill=c)
     font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',24)
     small=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',15)
+    if not grid:d.text((480,465),'EMPTY SCENE',font=font,fill=(153,171,188),anchor='mm')
     d.text((44,35),'VOXEL ARCHITECT / '+title.upper(),font=font,fill=(239,224,190))
     d.text((44,75),f'{dims[0]} × {dims[1]} × {dims[2]}  |  palette 0  |  seed 1  |  {count} box commands',font=small,fill=(153,171,188))
     d.text((44,850),'SKY130  •  66 MHz  •  UART procedural architecture',font=small,fill=(153,171,188))
