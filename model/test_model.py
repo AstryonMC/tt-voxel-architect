@@ -3,6 +3,18 @@ from model.architect import DEFAULTS,PROGRAMS,stream,tiles
 from tools.render import validate
 
 class ModelTests(unittest.TestCase):
+    def test_quality_geometry(self):
+        grid,_=validate(stream(*DEFAULTS[0],1,0),DEFAULTS[0])
+        self.assertEqual(grid[2,4,2],'oak_log[axis=y]')
+        self.assertIn('oak_door',grid[5,1,3])
+        self.assertIn('stairs',grid[1,5,2])
+        self.assertEqual(grid[8,7,8],'stone_brick_slab[type=top]')
+        grid,count=validate(stream(*DEFAULTS[4],1,4),DEFAULTS[4])
+        self.assertLessEqual(count,400)
+        self.assertEqual(grid[10,0,10],'stone')
+        self.assertEqual(grid[10,6,10],'oak_log[axis=y]')
+        self.assertEqual(grid[10,9,10],'oak_leaves[persistent=true]')
+
     def test_fill_limit(self):
         for a in range(5):
             validate(stream(255,255,255,1,a),(255,255,255),voxelize=False)

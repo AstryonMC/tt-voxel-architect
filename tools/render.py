@@ -36,6 +36,7 @@ def validate(text,dims,voxelize=True):
 
 def color(block):
     base=block.split('[')[0]
+    if '_door' in base or '_trapdoor' in base:return (111,73,41)
     for key,c in [('water',(56,138,201)),('glass',(133,196,204)),('grass',(100,155,68)),('leaves',(63,124,65)),('dirt',(131,94,66)),('gold',(237,192,67)),('lantern',(248,202,117)),('torch',(240,175,68)),('red_bed',(164,53,53)),('oak_log',(96,75,49)),('spruce',(83,64,47)),('dark_oak',(74,55,42)),('oak',(163,126,78)),('mossy',(115,131,102)),('sandstone',(213,186,131)),('prismarine',(69,131,128)),('deepslate',(66,69,78)),('chest',(149,102,48)),('iron',(115,123,129))]:
         if key in base:return c
     return (145,147,141)
@@ -45,20 +46,29 @@ def render(text,dims,path,title):
     occupied=len(grid)
     fine={}
     for (x,y,z),block in grid.items():
-        for dx in range(2):
-            for dy in range(2):
-                for dz in range(2):
-                    if '_slab[' in block and dy!=int('type=top' in block):continue
-                    if '_stairs[' in block and dy==1:
-                        high=('facing=north' in block and dz==0 or 'facing=south' in block and dz==1 or
-                              'facing=east' in block and dx==1 or 'facing=west' in block and dx==0)
+        for dx in range(4):
+            for dy in range(4):
+                for dz in range(4):
+                    if '_slab[' in block and (dy>=2)!=('type=top' in block):continue
+                    if '_stairs[' in block and dy>=2:
+                        high=('facing=north' in block and dz<2 or 'facing=south' in block and dz>=2 or
+                              'facing=east' in block and dx>=2 or 'facing=west' in block and dx<2)
                         if not high:continue
-                    if ('_bed[' in block or block=='crafting_table' or block.startswith('chest[')) and dy==1:continue
-                    if ('glass_pane' in block or 'iron_bars' in block) and dx==1:continue
-                    if ('_door[' in block or '_trapdoor[' in block) and dz==1:continue
-                    fine[x*2+dx,y*2+dy,dims[1]*2-1-(z*2+dz)]=block
+                    if '_bed[' in block and dy>=2:continue
+                    if block.startswith('chest[') and (dy==3 or dx==3 or dz==3):continue
+                    if ('glass_pane' in block or 'iron_bars' in block) and dx!=1:continue
+                    if ('_door[' in block or '_trapdoor[' in block) and dz!=0:continue
+                    if 'lantern' in block and block!='sea_lantern':
+                        if dx not in (1,2) or dz not in (1,2) or dy==3:continue
+                    if block=='torch' and (dx!=1 or dz!=1 or dy==3):continue
+                    fine[x*4+dx,y*4+dy,dims[1]*4-1-(z*4+dz)]=block
     grid=fine
-    scale=6.5;sy=scale/2;origin=(480,420)
+    tilt=.2 if title=='isla' else .42
+    projected=[(x-z,(x+z)*tilt-y) for x,y,z in grid]
+    lo=min(v[0] for v in projected);hi=max(v[0] for v in projected)
+    low=min(v[1] for v in projected);high=max(v[1] for v in projected)
+    scale=min(780/(hi-lo+2),620/(high-low+2));sy=scale*tilt
+    origin=(480-(hi+lo)*scale/2,465-(high+low)*scale/2)
     def proj(x,y,z):return (origin[0]+(x-z)*scale,origin[1]+(x+z)*sy-y*scale)
     im=Image.new('RGB',(960,900),(22,28,39));d=ImageDraw.Draw(im)
     for (x,y,z),block in sorted(grid.items(),key=lambda item:(item[0][0]+item[0][2],item[0][1])):
@@ -70,7 +80,7 @@ def render(text,dims,path,title):
         for delta,vertices,shade in faces:
             if tuple(a+b for a,b in zip((x,y,z),delta)) in grid:continue
             c=tuple(min(255,int(v*shade)) for v in rgb)
-            d.polygon([proj(*v) for v in vertices],fill=c,outline=tuple(int(v*.82) for v in c))
+            d.polygon([proj(*v) for v in vertices],fill=c)
     font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',24)
     small=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',15)
     d.text((44,35),'VOXEL ARCHITECT / '+title.upper(),font=font,fill=(239,224,190))

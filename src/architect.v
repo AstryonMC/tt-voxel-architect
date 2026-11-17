@@ -37,6 +37,9 @@ module tt_um_astryon_voxel_architect #(
  reg [3:0] hundreds,tens;
  reg [1:0] digit;
  reg [7:0] ix,iz,top,bottom;
+ reg [7:0] run_first,run_last;
+ reg [15:0] terrain_seed;
+ reg terrain;
  reg [1:0] layer;
  reg [2:0] depth;
  wire [7:0] distx=ix>(xmax>>1)?ix-(xmax>>1):(xmax>>1)-ix;
@@ -50,6 +53,9 @@ module tt_um_astryon_voxel_architect #(
    ({3'b0,distz}<<3)>=({3'b0,zmax}+1'b1)*2?3'd2:
    ({3'b0,distz}<<3)>=({3'b0,zmax}+1'b1)?3'd1:3'd0;
  wire [3:0] island_depth={1'b0,depthx}+{1'b0,depthz};
+ wire [7:0] candidate_top=(ymax>>1)+{7'b0,(terrain_seed[0]^ix[3]^iz[3])};
+ wire [8:0] island_distance={1'b0,distx}+{1'b0,distz};
+ wire [7:0] candidate_bottom=island_distance[8:1]>candidate_top?candidate_top:island_distance[8:1];
  wire [15:0] next_rng={rng[14:0],rng[15]^rng[13]^rng[12]^rng[10]};
  localparam IDLE=0,INIT=1,FETCH=2,EVAL=3,CLIP=4,CHECK=5,PREFIX=6,TILDE=7,
   DEC_INIT=8,DEC_H=9,DEC_T=10,DEC_OUT=11,SPACE=12,NAME=13,NL=14,NEXT=15,
@@ -87,7 +93,7 @@ module tt_um_astryon_voxel_architect #(
    startmeta<=0;startsync<=0;startlast<=0;counter<=0;rng<=1;busy<=0;done<=0;
    archetype<=0;palette<=0;xmax<=0;ymax<=0;zmax<=0;pc<=0;axis<=0;expr<=0;value<=0;
    block<=0;state<=IDLE;single<=0;pos<=0;coord<=0;remainder<=0;hundreds<=0;tens<=0;digit<=0;
-   ix<=0;iz<=0;top<=0;bottom<=0;layer<=0;depth<=0;
+   ix<=0;iz<=0;top<=0;bottom<=0;layer<=0;depth<=0;run_first<=0;run_last<=0;terrain_seed<=1;terrain<=0;
    xsum<=0;ysum<=0;zsum<=0;param_index<=0;
    for(i=0;i<6;i=i+1) begin bounds[i]<=0;whole[i]<=0;end
    for(i=0;i<9;i=i+1) begin xparam[i]<=0;yparam[i]<=0;zparam[i]<=0;end
@@ -111,6 +117,7 @@ module tt_um_astryon_voxel_architect #(
      end
     end
     INIT:begin
+     terrain<=archetype==4&&xmax>=7&&ymax>=7&&zmax>=7;terrain_seed<=rng;
      pc<=first_pc(archetype);axis<=0;ix<=0;iz<=0;layer<=0;
      xsum<=0;ysum<=0;zsum<=0;param_index<=0;
      if(xmax<7||ymax<7||zmax<7) begin
@@ -184,22 +191,26 @@ module tt_um_astryon_voxel_architect #(
     NAME:if(name_char(block,pos)==0) state<=NL;else if(txready) pos<=pos+1'b1;
     NL:if(txready) state<=TILE_NEXT;
     NEXT:begin
-     if(archetype==4&&xmax>=7&&ymax>=7&&zmax>=7&&iz<=zmax) state<=ISLAND_NEXT;
+     if(terrain) state<=ISLAND_NEXT;
      else if(pc>=last_pc(archetype)) begin state<=DONE;pos<=0;end
      else begin pc<=pc+1'b1;state<=FETCH;end
     end
     DONE:if(txready) begin if(pos==4) state<=DRAIN;else pos<=pos+1'b1;end
     DRAIN:if(txready) begin busy<=0;done<=1;state<=IDLE;end
     ISLAND:begin
-     if(island_depth>=4) begin layer<=2;state<=ISLAND_NEXT;end
+     if(iz>zmax) begin layer<=2;state<=ISLAND_NEXT;end
+     else if(island_depth>=4) iz<=iz+1'b1;
      else begin
-      depth<=island_depth[2:0];
-      rng<=next_rng;top<=(ymax>>1)+{7'b0,next_rng[0]};state<=ISLAND_HEIGHT;layer<=0;
+      run_first<=iz;run_last<=iz;iz<=iz+1'b1;
+      rng<=next_rng;top<=candidate_top;bottom<=candidate_bottom;state<=ISLAND_HEIGHT;layer<=0;
      end
     end
-    ISLAND_HEIGHT:begin bottom<={5'b0,depth}>top?top:{5'b0,depth};state<=ISLAND_BOX;end
+    ISLAND_HEIGHT:begin
+     if(iz<=zmax&&island_depth<4&&candidate_top==top&&candidate_bottom==bottom) begin run_last<=iz;iz<=iz+1'b1;end
+     else state<=ISLAND_BOX;
+    end
     ISLAND_BOX:begin
-     bounds[0]<=ix;bounds[3]<=ix;bounds[2]<=iz;bounds[5]<=iz;bounds[4]<=top;
+     bounds[0]<=ix;bounds[3]<=ix;bounds[2]<=run_first;bounds[5]<=run_last;bounds[4]<=top;
      if(layer==0) begin bounds[1]<=bottom;block<=block_id(6'd20,palette,0);end
      else if(layer==1) begin bounds[1]<=top>bottom?top-1'b1:bottom;block<=block_id(6'd19,palette,0);end
      else begin bounds[1]<=top;block<=block_id(6'd18,palette,0);end
@@ -208,10 +219,10 @@ module tt_um_astryon_voxel_architect #(
     ISLAND_NEXT:begin
      if(layer!=2) begin layer<=layer+1'b1;state<=ISLAND_BOX;end
      else begin layer<=0;
-      if(iz==zmax) begin
-       if(ix==xmax) begin iz<=zmax+1'b1;state<=FETCH;end
+      if(iz>zmax) begin
+       if(ix==xmax) begin terrain<=0;state<=FETCH;end
        else begin ix<=ix+1'b1;iz<=0;state<=ISLAND;end
-      end else begin iz<=iz+1'b1;state<=ISLAND;end
+      end else state<=ISLAND;
      end
     end
     default:state<=IDLE;
