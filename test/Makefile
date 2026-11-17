@@ -7,6 +7,7 @@ FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = architect.v uart.v parser.v
+CUSTOM_COMPILE_DEPS += $(SRC_DIR)/rom.vh
 export PYTHONPATH := $(PWD)/..:$(PYTHONPATH)
 ifneq ($(REAL),yes)
 ifneq ($(GATES),yes)
