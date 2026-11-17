@@ -513,50 +513,50 @@ default: expression=0; endcase
 3'd5: expression=10'd128;
 default: expression=0; endcase
 10'd64: case(bound_index)
-3'd0: expression=10'd3;
+3'd0: expression=10'd129;
 3'd1: expression=10'd2;
 3'd2: expression=10'd129;
-3'd3: expression=10'd3;
+3'd3: expression=10'd129;
 3'd4: expression=10'd3;
 3'd5: expression=10'd129;
 default: expression=0; endcase
 10'd65: case(bound_index)
-3'd0: expression=10'd3;
+3'd0: expression=10'd129;
 3'd1: expression=10'd1;
 3'd2: expression=10'd128;
-3'd3: expression=10'd3;
+3'd3: expression=10'd129;
 3'd4: expression=10'd1;
 3'd5: expression=10'd128;
 default: expression=0; endcase
 10'd66: case(bound_index)
-3'd0: expression=10'd3;
+3'd0: expression=10'd129;
 3'd1: expression=10'd2;
 3'd2: expression=10'd128;
-3'd3: expression=10'd3;
+3'd3: expression=10'd129;
 3'd4: expression=10'd2;
 3'd5: expression=10'd128;
 default: expression=0; endcase
 10'd67: case(bound_index)
-3'd0: expression=10'd573;
+3'd0: expression=10'd384;
 3'd1: expression=10'd2;
 3'd2: expression=10'd129;
-3'd3: expression=10'd573;
+3'd3: expression=10'd384;
 3'd4: expression=10'd3;
 3'd5: expression=10'd129;
 default: expression=0; endcase
 10'd68: case(bound_index)
-3'd0: expression=10'd573;
+3'd0: expression=10'd384;
 3'd1: expression=10'd1;
 3'd2: expression=10'd128;
-3'd3: expression=10'd573;
+3'd3: expression=10'd384;
 3'd4: expression=10'd1;
 3'd5: expression=10'd128;
 default: expression=0; endcase
 10'd69: case(bound_index)
-3'd0: expression=10'd573;
+3'd0: expression=10'd384;
 3'd1: expression=10'd2;
 3'd2: expression=10'd128;
-3'd3: expression=10'd573;
+3'd3: expression=10'd384;
 3'd4: expression=10'd2;
 3'd5: expression=10'd128;
 default: expression=0; endcase

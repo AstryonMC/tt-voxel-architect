@@ -77,7 +77,7 @@ def programs():
                 for xx in [1,END-1]: box(xx,1,zz,xx,E(6),zz,'frame')
             point(MID,1,E(2)+1,'oak_door[half=lower,facing=north]');point(MID,2,E(2)+1,'oak_door[half=upper,facing=north]')
             point(MID,0,E(2),'trim');point(MID-2,3,E(2),'light');point(MID+2,3,E(2),'light')
-            for xx in [3,END-3]:
+            for xx in [E(2)+1,E(6)]:
                 box(xx,2,E(2)+1,xx,3,E(2)+1,'glass');point(xx,1,E(2),'trim')
                 point(xx,2,E(2),'oak_trapdoor[facing=north,half=bottom,open=true]')
             point(3,1,E(6)-1,'red_bed[part=head,facing=south]');point(3,1,E(6)-2,'red_bed[part=foot,facing=south]')

@@ -3,6 +3,14 @@ from model.architect import DEFAULTS,PROGRAMS,stream,tiles
 from tools.render import validate
 
 class ModelTests(unittest.TestCase):
+    def test_narrow_house_door(self):
+        for width in range(8,13):
+            for palette in range(4):
+                grid,_=validate(stream(width,12,8,1,palette<<4),(width,12,8))
+                x=(width-1)//2
+                self.assertEqual(grid[x,1,3],'oak_door[half=lower,facing=north]')
+                self.assertEqual(grid[x,2,3],'oak_door[half=upper,facing=north]')
+
     def test_quality_geometry(self):
         grid,_=validate(stream(*DEFAULTS[0],1,0),DEFAULTS[0])
         self.assertEqual(grid[2,4,2],'oak_log[axis=y]')
