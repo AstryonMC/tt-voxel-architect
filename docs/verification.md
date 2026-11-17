@@ -60,7 +60,8 @@ Number of processes:              0
 This is an unmapped generic-cell estimate, not a sky130 standard-cell count or an area
 signoff. The local Tiny Tapeout flow uses LibreLane 3.0.14 in Docker, sky130A, and a
 15.151515 ns clock period. Its lint checks report zero errors, warnings, timing constructs,
-and inferred latches.
+and inferred latches. Technology-mapped synthesis reports **7,726 instances** with
+**85,010.2816 square microns** of standard-cell area, before placement/timing buffers.
 
 The initial **2x2** attempt failed detailed placement:
 
@@ -68,10 +69,11 @@ The initial **2x2** attempt failed detailed placement:
 [ERROR DPL-0036] Detailed placement failed.
 ```
 
-`info.yaml` therefore selects **4x2**. The final 4x2 run reached clock-tree synthesis and
-post-CTS timing repair. Before repair, nominal TT setup slack was +2.209 ns, but nominal
-SS setup slack was -5.063 ns; nominal TT alone is not evidence of timing closure. Full
-post-route timing, DRC, LVS and gate-level simulation are not yet signed off at this checkpoint.
+`info.yaml` therefore selects **4x2**. The final 4x2 run passed placement, clock-tree
+synthesis, post-CTS timing repair, global routing, and antenna repair, and is still running
+the detailed router at this checkpoint. The post-CTS nominal TT setup slack was +2.209 ns;
+an earlier nominal SS estimate was -5.063 ns. Nominal TT alone is not evidence of timing
+closure. Full post-route timing, DRC, LVS and gate-level simulation are not yet signed off.
 Local reports and logs are ignored under `runs/` and `*.log`; reproduce with:
 
 ```
