@@ -19,6 +19,9 @@ module tt_um_astryon_voxel_architect #(
  reg [15:0] counter,rng;
  reg [1:0] palette;
  reg [7:0] xmax,ymax,zmax;
+ reg [7:0] xparam[0:8],yparam[0:8],zparam[0:8];
+ reg [10:0] xsum,ysum,zsum;
+ reg [3:0] param_index;
  reg [9:0] pc;
  reg [2:0] axis;
  reg [7:0] bounds[0:5];
@@ -49,7 +52,7 @@ module tt_um_astryon_voxel_architect #(
  wire [15:0] next_rng={rng[14:0],rng[15]^rng[13]^rng[12]^rng[10]};
  localparam IDLE=0,INIT=1,FETCH=2,EVAL=3,CLIP=4,CHECK=5,PREFIX=6,TILDE=7,
   DEC_INIT=8,DEC_H=9,DEC_T=10,DEC_OUT=11,SPACE=12,NAME=13,NL=14,NEXT=15,
-  DONE=16,DRAIN=17,ISLAND=18,ISLAND_HEIGHT=19,ISLAND_BOX=20,ISLAND_NEXT=21;
+  DONE=16,DRAIN=17,ISLAND=18,ISLAND_HEIGHT=19,ISLAND_BOX=20,ISLAND_NEXT=21,PARAMS=22;
  `include "rom.vh"
  function [7:0] prefix_char;input is_single;input [5:0] n;
  begin
@@ -81,7 +84,9 @@ module tt_um_astryon_voxel_architect #(
    archetype<=0;palette<=0;xmax<=0;ymax<=0;zmax<=0;pc<=0;axis<=0;expr<=0;value<=0;
    block<=0;state<=IDLE;single<=0;pos<=0;coord<=0;remainder<=0;hundreds<=0;tens<=0;digit<=0;
    ix<=0;iz<=0;top<=0;bottom<=0;layer<=0;depth<=0;
+   xsum<=0;ysum<=0;zsum<=0;param_index<=0;
    for(i=0;i<6;i=i+1) bounds[i]<=0;
+   for(i=0;i<9;i=i+1) begin xparam[i]<=0;yparam[i]<=0;zparam[i]<=0;end
   end else begin
    counter<=counter+1'b1;startmeta<=ui_in[0];startsync<=startmeta;startlast<=startsync;
    case(state)
@@ -103,19 +108,25 @@ module tt_um_astryon_voxel_architect #(
     end
     INIT:begin
      pc<=first_pc(archetype);axis<=0;ix<=0;iz<=0;layer<=0;
+     xsum<=0;ysum<=0;zsum<=0;param_index<=0;
      if(xmax<7||ymax<7||zmax<7) begin
       bounds[0]<=0;bounds[1]<=0;bounds[2]<=0;bounds[3]<=xmax;bounds[4]<=0;bounds[5]<=zmax;
       block<=block_id(0,palette,0);state<=CHECK;pc<=last_pc(archetype);
-     end else if(archetype==4) state<=ISLAND;
-     else state<=FETCH;
+     end else state<=PARAMS;
+    end
+    PARAMS:begin
+     xparam[param_index]<=xsum[10:3];yparam[param_index]<=ysum[10:3];zparam[param_index]<=zsum[10:3];
+     xsum<=xsum+{3'b0,xmax};ysum<=ysum+{3'b0,ymax};zsum<=zsum+{3'b0,zmax};
+     if(param_index==8) state<=archetype==4?ISLAND:FETCH;
+     else param_index<=param_index+1'b1;
     end
     FETCH:if(pc==last_pc(archetype)) begin state<=DONE;pos<=0;end
      else begin expr<=expression(pc,axis);state<=EVAL;end
     EVAL:begin
      case(axis)
-      0,3:value<=$signed({1'b0,(({4'b0,xmax}*expr[9:6])>>3)})+$signed({{7{expr[5]}},expr[5:0]});
-      1,4:value<=$signed({1'b0,(({4'b0,ymax}*expr[9:6])>>3)})+$signed({{7{expr[5]}},expr[5:0]});
-      default:value<=$signed({1'b0,(({4'b0,zmax}*expr[9:6])>>3)})+$signed({{7{expr[5]}},expr[5:0]});
+      0,3:value<=$signed({5'b0,xparam[expr[9:6]]})+$signed({{7{expr[5]}},expr[5:0]});
+      1,4:value<=$signed({5'b0,yparam[expr[9:6]]})+$signed({{7{expr[5]}},expr[5:0]});
+      default:value<=$signed({5'b0,zparam[expr[9:6]]})+$signed({{7{expr[5]}},expr[5:0]});
      endcase
      state<=CLIP;
     end

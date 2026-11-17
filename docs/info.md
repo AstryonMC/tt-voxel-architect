@@ -15,8 +15,9 @@ Inputs RX and START have two-flop synchronizers; reset is synchronous active-low
 UART midpoint-samples eight data bits and checks the stop bit. Default divisor is 572
 clocks, giving +0.16% baud error. The parser saturates dimensions at 255 (zero becomes
 one), wraps seeds to 16 bits and discards malformed/busy lines through LF. INIT latches
-maximum coordinates and configuration. Six ROM expressions per box are evaluated and
-registered sequentially: `(maximum*k >> 3) + signed_offset`. Motif repeats are compiler
+maximum coordinates and configuration. A nine-cycle parameter unit precomputes all eighth
+fractions by repeated addition into a small register file. Six ROM expressions per box
+select these fractions, add a signed offset and register the result. Motif repeats are compiler
 unrolled, while island columns use a runtime nested loop. A seeded LFSR supplies texture.
 The decimal formatter repeatedly subtracts 100 and 10 and suppresses leading zeroes.
 Ready/valid backpressure holds characters until UART accepts them. Done asserts only

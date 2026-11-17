@@ -1,42 +1,41 @@
-![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
+# Voxel Architect — Tiny Tapeout sky130
 
-# Tiny Tapeout Verilog Project Template
+Procedural Minecraft Java architecture in synthesizable Verilog, targeting **66 MHz**.
+Compatible with the original `puente_lan/bot_lan.js` line protocol. No external RAM or CPU.
 
-- [Read the documentation for project](docs/info.md)
+```
+BUILD 12 12 8 1 0
+```
 
-## What is Tiny Tapeout?
+The chip replies with ordered `/fill` and `/setblock` commands, then `DONE`.
+Five architectural programs × four material palettes; seeded texture and floating terrain.
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+| Casa | Spawn |
+|---|---|
+| ![House](docs/img/casa.png) | ![Plaza](docs/img/spawn.png) |
+| Castillo | Templo |
+| ![Castle](docs/img/castillo.png) | ![Temple](docs/img/templo.png) |
 
-To learn more and get started, visit https://tinytapeout.com.
+![Floating island](docs/img/isla.png)
 
-## Set up your Verilog project
+These are schematic previews, not Minecraft screenshots. See [the datasheet](docs/info.md)
+for pins, serial protocol, architecture, development commands and rendering limitations.
+[The specification](docs/SPEC.md) is the source of truth.
 
-1. Add your Verilog files to the `src` folder.
-2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
-3. Edit [docs/info.md](docs/info.md) and add a description of your project.
-4. Adapt the testbench to your design. See [test/README.md](test/README.md) for more information.
+## Development
 
-The GitHub action will automatically build the ASIC files using [LibreLane](https://www.zerotoasiccourse.com/terminology/librelane/).
+* `src/`: standard TT top, UART RX/TX, streaming parser and generated expression/material/name ROM.
+* `model/architect.py`: executable Python architectural programs and independent byte-stream evaluator.
+* `tools/compile_rom.py`: regenerate ROM; `--check` verifies it is up to date.
+* `tools/render.py --all`: command validation and isometric PNG previews.
+* `test/`: cocotb byte-for-byte physical UART comparisons, including production clock/baud and GL mode.
 
-## Enable GitHub actions to build the results page
+```
+python -m pip install -r test/requirements.txt
+python tools/compile_rom.py --check
+python -m unittest discover -s model -p 'test_*.py'
+```
 
-- [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
-
-## Resources
-
-- [FAQ](https://tinytapeout.com/faq/)
-- [Digital design lessons](https://tinytapeout.com/digital_design/)
-- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-- [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
-
-## What next?
-
-- [Submit your design to the next shuttle](https://app.tinytapeout.com/).
-- Edit [this README](README.md) and explain your design, how it works, and how to test it.
-- Share your project on your social network of choice:
-  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)
-  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)
-  - X (formerly Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)
-  - Bluesky [@tinytapeout.com](https://bsky.app/profile/tinytapeout.com)
+Run `make` in `test/` for the fast regression; `make REAL=yes` for a short complete build
+at 66 MHz / 115200 baud. `make GATES=yes` uses the gate-level netlist supplied by TT CI.
+The official template's GDS, test, documentation and FPGA workflows are retained.
