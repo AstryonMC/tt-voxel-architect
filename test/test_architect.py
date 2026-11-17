@@ -64,6 +64,8 @@ async def serial_model_comparison(d):
     await build(d,'TEST_CASA\r\n',(12,12,8,1,0))
     await build(d,'TEST_SPAWN\n',(30,30,12,1,1))
     await build(d,'  BUILD   9  10  8  0   48  \r\n',(9,10,8,0,48))
+    text=await build(d,'BUILD 255 255 1 1 0\n',(255,255,1,1,0))
+    validate(text,(255,255,1),voxelize=False)
 
 @cocotb.test(skip=REAL)
 async def parser_and_start(d):

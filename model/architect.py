@@ -143,7 +143,14 @@ def programs():
 PROGRAMS = programs()
 def lfsr(s): return ((s<<1)&65535) | (((s>>15)^(s>>13)^(s>>12)^(s>>10))&1)
 
-def commands(mx=12,mz=12,my=8,seed=1,flags=0):
+def tiles(bounds):
+    x,y,z,X,Y,Z=bounds
+    for a in range(x,X+1,32):
+        for b in range(y,Y+1,32):
+            for c in range(z,Z+1,32):
+                yield a,b,c,min(a+31,X),min(b+31,Y),min(c+31,Z)
+
+def raw_commands(mx=12,mz=12,my=8,seed=1,flags=0):
     mx,mz,my = [max(1,min(255,v)) for v in (mx,mz,my)]
     arch=flags&15; arch=arch if arch<5 else 0
     palette=(flags>>4)&3; rng=(seed&65535) or 1
@@ -169,5 +176,15 @@ def commands(mx=12,mz=12,my=8,seed=1,flags=0):
         if any(c[i]>c[i+3] for i in range(3)): continue
         yield line(c,r)
     yield 'DONE\n'
+
+def commands(*args,**kwargs):
+    for line in raw_commands(*args,**kwargs):
+        fields=line.split()
+        if fields[0]!='/fill':
+            yield line
+            continue
+        for c in tiles(tuple(int(v[1:]) for v in fields[1:7])):
+            single=c[:3]==c[3:]
+            yield ('/setblock ' if single else '/fill ')+' '.join('~'+str(v) for v in (c[:3] if single else c))+' '+fields[-1]+'\n'
 
 def stream(*args): return ''.join(commands(*args))

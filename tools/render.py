@@ -9,7 +9,7 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from model.architect import DEFAULTS,NAMES,PALETTES,FIXED,stream
 
 VALID=set(FIXED+[n for p in PALETTES for n in p])
-def validate(text,dims):
+def validate(text,dims,voxelize=True):
     grid={};count=0
     lines=text.splitlines()
     assert lines and lines[-1]=='DONE', 'missing DONE'
@@ -24,7 +24,9 @@ def validate(text,dims):
         assert t[-1] in VALID,t[-1]
         limits=(dims[0],dims[2],dims[1])
         assert all(0<=c[i]<=c[i+3]<limits[i] for i in range(3)),line
+        assert (c[3]-c[0]+1)*(c[4]-c[1]+1)*(c[5]-c[2]+1)<=32768,line
         count+=1
+        if not voxelize:continue
         for x in range(c[0],c[3]+1):
             for y in range(c[1],c[4]+1):
                 for z in range(c[2],c[5]+1):

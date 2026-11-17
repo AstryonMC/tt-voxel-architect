@@ -25,6 +25,7 @@ module tt_um_astryon_voxel_architect #(
  reg [9:0] pc;
  reg [2:0] axis;
  reg [7:0] bounds[0:5];
+ reg [7:0] whole[0:5];
  reg [9:0] expr;
  reg signed [12:0] value;
  reg [6:0] block;
@@ -52,7 +53,10 @@ module tt_um_astryon_voxel_architect #(
  wire [15:0] next_rng={rng[14:0],rng[15]^rng[13]^rng[12]^rng[10]};
  localparam IDLE=0,INIT=1,FETCH=2,EVAL=3,CLIP=4,CHECK=5,PREFIX=6,TILDE=7,
   DEC_INIT=8,DEC_H=9,DEC_T=10,DEC_OUT=11,SPACE=12,NAME=13,NL=14,NEXT=15,
-  DONE=16,DRAIN=17,ISLAND=18,ISLAND_HEIGHT=19,ISLAND_BOX=20,ISLAND_NEXT=21,PARAMS=22;
+  DONE=16,DRAIN=17,ISLAND=18,ISLAND_HEIGHT=19,ISLAND_BOX=20,ISLAND_NEXT=21,PARAMS=22,
+  TILE_PREP=23,TILE_NEXT=24;
+ function [7:0] tile_end;input [7:0] first,last;
+ begin tile_end=({1'b0,first}+9'd31)>{1'b0,last}?last:first+8'd31;end endfunction
  `include "rom.vh"
  function [7:0] prefix_char;input is_single;input [5:0] n;
  begin
@@ -85,7 +89,7 @@ module tt_um_astryon_voxel_architect #(
    block<=0;state<=IDLE;single<=0;pos<=0;coord<=0;remainder<=0;hundreds<=0;tens<=0;digit<=0;
    ix<=0;iz<=0;top<=0;bottom<=0;layer<=0;depth<=0;
    xsum<=0;ysum<=0;zsum<=0;param_index<=0;
-   for(i=0;i<6;i=i+1) bounds[i]<=0;
+   for(i=0;i<6;i=i+1) begin bounds[i]<=0;whole[i]<=0;end
    for(i=0;i<9;i=i+1) begin xparam[i]<=0;yparam[i]<=0;zparam[i]<=0;end
   end else begin
    counter<=counter+1'b1;startmeta<=ui_in[0];startsync<=startmeta;startlast<=startsync;
@@ -141,9 +145,28 @@ module tt_um_astryon_voxel_architect #(
      else begin axis<=axis+1'b1;state<=FETCH;end
     end
     CHECK:begin
-     single<=bounds[0]==bounds[3]&&bounds[1]==bounds[4]&&bounds[2]==bounds[5];pos<=0;coord<=0;
      if(bounds[0]>bounds[3]||bounds[1]>bounds[4]||bounds[2]>bounds[5]) state<=NEXT;
-     else state<=PREFIX;
+     else begin
+      for(i=0;i<6;i=i+1) whole[i]<=bounds[i];
+      for(i=0;i<3;i=i+1) bounds[i+3]<=tile_end(bounds[i],bounds[i+3]);
+      state<=TILE_PREP;
+     end
+    end
+    TILE_PREP:begin
+     single<=bounds[0]==bounds[3]&&bounds[1]==bounds[4]&&bounds[2]==bounds[5];pos<=0;coord<=0;state<=PREFIX;
+    end
+    TILE_NEXT:begin
+     state<=TILE_PREP;
+     if(bounds[5]<whole[5]) begin bounds[2]<=bounds[5]+1'b1;bounds[5]<=tile_end(bounds[5]+1'b1,whole[5]);end
+     else begin
+      bounds[2]<=whole[2];bounds[5]<=tile_end(whole[2],whole[5]);
+      if(bounds[4]<whole[4]) begin bounds[1]<=bounds[4]+1'b1;bounds[4]<=tile_end(bounds[4]+1'b1,whole[4]);end
+      else begin
+       bounds[1]<=whole[1];bounds[4]<=tile_end(whole[1],whole[4]);
+       if(bounds[3]<whole[3]) begin bounds[0]<=bounds[3]+1'b1;bounds[3]<=tile_end(bounds[3]+1'b1,whole[3]);end
+       else state<=NEXT;
+      end
+     end
     end
     PREFIX:if(txready) begin
      if((single&&pos==9)||(!single&&pos==5)) begin state<=TILDE;pos<=0;end else pos<=pos+1'b1;
@@ -159,7 +182,7 @@ module tt_um_astryon_voxel_architect #(
      else begin coord<=coord+1'b1;state<=TILDE;end
     end
     NAME:if(name_char(block,pos)==0) state<=NL;else if(txready) pos<=pos+1'b1;
-    NL:if(txready) state<=NEXT;
+    NL:if(txready) state<=TILE_NEXT;
     NEXT:begin
      if(archetype==4&&xmax>=7&&ymax>=7&&zmax>=7&&iz<=zmax) state<=ISLAND_NEXT;
      else if(pc>=last_pc(archetype)) begin state<=DONE;pos<=0;end

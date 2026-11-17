@@ -1,8 +1,19 @@
 import unittest
-from model.architect import DEFAULTS,PROGRAMS,stream
+from model.architect import DEFAULTS,PROGRAMS,stream,tiles
 from tools.render import validate
 
 class ModelTests(unittest.TestCase):
+    def test_fill_limit(self):
+        for a in range(5):
+            validate(stream(255,255,255,1,a),(255,255,255),voxelize=False)
+        for bounds in ((0,0,0,31,31,31),(1,2,3,33,34,35),(254,254,254,254,254,254)):
+            chunks=list(tiles(bounds))
+            self.assertEqual(sum((c[3]-c[0]+1)*(c[4]-c[1]+1)*(c[5]-c[2]+1) for c in chunks),
+                             (bounds[3]-bounds[0]+1)*(bounds[4]-bounds[1]+1)*(bounds[5]-bounds[2]+1))
+        self.assertEqual(list(tiles((1,0,0,0,0,0))),[])
+        with self.assertRaises(AssertionError):
+            validate('/fill ~0 ~0 ~0 ~254 ~0 ~254 stone\nDONE\n',(255,255,255),voxelize=False)
+
     def test_archetypes_palettes(self):
         for a,dims in enumerate(DEFAULTS):
             for p in range(4):
