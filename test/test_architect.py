@@ -65,6 +65,7 @@ async def serial_model_comparison(d):
     await build(d,'TEST_SPAWN\n',(30,30,12,1,1))
     await build(d,'  BUILD   9  10  8  0   48  \r\n',(9,10,8,0,48))
     await build(d,'BUILD 8 12 8 1 0\n',(8,12,8,1,0))
+    await build(d,'BUILD 26 26 8 1 2\n',(26,26,8,1,2))
     await build(d,'BUILD 22 22 14 1 4\n',(22,22,14,1,4))
     text=await build(d,'BUILD 255 255 1 1 0\n',(255,255,1,1,0))
     validate(text,(255,255,1),voxelize=False)

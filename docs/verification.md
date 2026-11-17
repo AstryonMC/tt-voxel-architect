@@ -10,9 +10,9 @@ The independent `/fill`-limit fix is `cd0b5b59d14c2f547bbd98b9f78f666410a474c0`.
 
 ```
 $ python -m unittest discover -s model -p 'test_*.py'
-............
+.............
 ----------------------------------------------------------------------
-Ran 12 tests in 0.959s
+Ran 13 tests in 2.661s
 
 OK
 ```
@@ -20,10 +20,10 @@ OK
 Icarus Verilog 11.0 and cocotb 2.1.0, full `make` from `test/`:
 
 ```
-** test_architect.serial_model_comparison   PASS   128451340.00         369.43     347704.60  **
-** test_architect.maximum_build             PASS    30353610.00          78.87     384848.55  **
-** test_architect.parser_and_start          PASS     2197500.00           5.61     391467.67  **
-** TESTS=3 PASS=3 FAIL=0 SKIP=0                    161002450.00         453.91     354699.27  **
+** test_architect.serial_model_comparison   PASS   137650870.00         366.57     375510.05  **
+** test_architect.maximum_build             PASS    30353610.00          76.85     394982.39  **
+** test_architect.parser_and_start          PASS     2197500.00           5.71     385034.09  **
+** TESTS=3 PASS=3 FAIL=0 SKIP=0                    170201980.00         449.13     378962.16  **
 ```
 
 This compares physical UART bytes with the golden model across all five archetypes and
@@ -56,11 +56,17 @@ the exact canopy populations (21/9 blocks at height 10, 21/9/5 at height 14), ex
 trunk lengths, dirt stratum, one-block edge transition and a single bottom tip.
 Widths 8–12 across all palettes retain both house door halves. Renderer tests cover
 normal, air-only, DONE-only and invalid scenes.
+Castle heights 1–255 plus clamping endpoints are swept for two-block entry headroom.
+An interior air pass removes a too-low intermediate floor only where it would obstruct
+the ground floor; higher intermediate floors remain intact. The sweep also checks
+the gatehouse passage behind the portcullis and the four tower interiors. The existing
+height-below-eight fallback emits a platform without doors.
 
 The maximum-house test's complete 37,451-byte physical-UART output matches the model byte for byte and every
 fill passes the volume validator. Fast coverage also includes a 255×255 platform and
 a 40³ house to exercise tiles across all axes and partial final tiles, the reported
 `BUILD 8 12 8 1 0` narrow-door case and the taller `BUILD 22 22 14 1 4` island.
+`BUILD 26 26 8 1 2` compares the low keep's complete UART stream as well.
 
 The generated ROM is an explicit simulation compile dependency. Without it, incremental
 `make` could compare a stale compiled RTL ROM against an updated Python model.
@@ -115,7 +121,7 @@ temple, and island proportions. Final defaults, palette 0, seed 1:
 |---|---:|---:|
 | `img/casa.png` | 77 | 460 |
 | `img/spawn.png` | 54 | 2641 |
-| `img/castillo.png` | 261 | 3033 |
+| `img/castillo.png` | 262 | 3033 |
 | `img/templo.png` | 51 | 1081 |
 | `img/isla.png` | 291 | 574 |
 | `img/isla-tall.png` (22×22×14) | 327 | 1038 |

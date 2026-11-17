@@ -37,6 +37,23 @@ class ModelTests(unittest.TestCase):
         self.assertNotIn((12,1,7),grid)
         self.assertIn('stairs',grid[7,13,9])
 
+    def test_castle_entry_headroom(self):
+        for height in (0,*range(1,256),256):
+            with self.subTest(height=height):
+                clamped=max(1,min(255,height))
+                grid,_=validate(stream(26,26,height,1,2),(26,26,clamped))
+                doors=[pos for pos,b in grid.items() if b=='oak_door[half=lower,facing=north]']
+                self.assertEqual(len(doors),int(clamped>=8))
+                for x,y,z in doors:
+                    self.assertEqual(grid[x,y+1,z],'oak_door[half=upper,facing=north]')
+                    for Y in [y,y+1]: self.assertNotIn((x,Y,z+1),grid)
+                if clamped<8:continue
+                for x in range(9,16):
+                    for z in range(11,18):
+                        for y in [1,2]:self.assertNotIn((x,y,z),grid)
+                for x,z in [(12,2),(12,3),(3,3),(3,22),(22,3),(22,22)]:
+                    for y in [1,2]:self.assertNotIn((x,y,z),grid)
+
     def test_island_profile(self):
         for height,layers in [(10,{8:21,9:9}),(14,{11:21,12:9,13:5})]:
             grid,count=validate(stream(22,22,height,1,4),(22,22,height))

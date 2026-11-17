@@ -133,6 +133,7 @@ def programs():
             x,X,z,Z=E(3)-1,E(5)+1,E(3)+1,E(6)
             box(x,0,z,X,E(6),Z,'wall');box(x+1,1,z+1,X-1,E(6)-1,Z-1,'air')
             box(x,0,z,X,0,Z,'wall');box(x,E(3),z,X,E(3),Z,'wall')
+            box(x+1,1,z+1,X-1,2,Z-1,'air')
             for xx in [x,X]:
                 for zz in [z,Z]: box(xx,1,zz,xx,E(6)-1,zz,'texture')
             for yy in [E(2),E(4)+1]:
