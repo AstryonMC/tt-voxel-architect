@@ -6,12 +6,21 @@ SIM ?= icarus
 FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+PROJECT_SOURCES = architect.v uart.v parser.v
+export PYTHONPATH := $(PWD)/..:$(PYTHONPATH)
+ifneq ($(REAL),yes)
+ifneq ($(GATES),yes)
+COMPILE_ARGS += -DFAST_UART
+endif
+endif
 
 ifneq ($(GATES),yes)
 
 # RTL simulation:
 SIM_BUILD				= sim_build/rtl
+ifeq ($(REAL),yes)
+SIM_BUILD = sim_build/real
+endif
 VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
 
 else
@@ -39,7 +48,7 @@ VERILOG_SOURCES += $(PWD)/tb.v
 TOPLEVEL = tb
 
 # List test modules to run, separated by commas and without the .py suffix:
-COCOTB_TEST_MODULES = test
+COCOTB_TEST_MODULES = test_architect
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
