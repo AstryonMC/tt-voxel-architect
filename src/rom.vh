@@ -2987,7 +2987,7 @@ default: expression=0; endcase
 default: expression=0; endcase end endfunction
 function [5:0] role; input [9:0] address; begin case(address)
 10'd0: role=6'd14;
-10'd1: role=6'd0;
+10'd1: role=6'd4;
 10'd2: role=6'd13;
 10'd3: role=6'd4;
 10'd4: role=6'd1;
@@ -3057,7 +3057,7 @@ function [5:0] role; input [9:0] address; begin case(address)
 10'd68: role=6'd22;
 10'd69: role=6'd23;
 10'd70: role=6'd24;
-10'd71: role=6'd33;
+10'd71: role=6'd34;
 10'd72: role=6'd3;
 10'd73: role=6'd3;
 10'd74: role=6'd0;
@@ -3117,18 +3117,18 @@ function [5:0] role; input [9:0] address; begin case(address)
 10'd128: role=6'd4;
 10'd129: role=6'd4;
 10'd130: role=6'd4;
-10'd131: role=6'd33;
-10'd132: role=6'd33;
-10'd133: role=6'd33;
-10'd134: role=6'd33;
-10'd135: role=6'd33;
-10'd136: role=6'd33;
-10'd137: role=6'd33;
-10'd138: role=6'd33;
-10'd139: role=6'd33;
-10'd140: role=6'd33;
-10'd141: role=6'd33;
-10'd142: role=6'd33;
+10'd131: role=6'd34;
+10'd132: role=6'd34;
+10'd133: role=6'd34;
+10'd134: role=6'd34;
+10'd135: role=6'd34;
+10'd136: role=6'd34;
+10'd137: role=6'd34;
+10'd138: role=6'd34;
+10'd139: role=6'd34;
+10'd140: role=6'd34;
+10'd141: role=6'd34;
+10'd142: role=6'd34;
 10'd143: role=6'd5;
 10'd144: role=6'd5;
 10'd145: role=6'd5;
@@ -3350,8 +3350,8 @@ function [5:0] role; input [9:0] address; begin case(address)
 10'd361: role=6'd10;
 10'd362: role=6'd16;
 10'd363: role=6'd16;
-10'd364: role=6'd6;
-10'd365: role=6'd6;
+10'd364: role=6'd33;
+10'd365: role=6'd33;
 10'd366: role=6'd8;
 10'd367: role=6'd8;
 10'd368: role=6'd8;
@@ -3408,7 +3408,8 @@ function [6:0] block_id; input [5:0] r; input [1:0] p; input [1:0] noise; begin 
 8'd30: block_id=7'd64;
 8'd31: block_id=7'd65;
 8'd32: block_id=7'd66;
-8'd33: case(noise) 2'd0: block_id=7'd65; 2'd1: block_id=7'd66; 2'd2: block_id=7'd0; 2'd3: block_id=7'd48; endcase
+8'd33: block_id=7'd29;
+8'd34: case(noise) 2'd0: block_id=7'd65; 2'd1: block_id=7'd66; 2'd2: block_id=7'd0; 2'd3: block_id=7'd48; endcase
 8'd64: block_id=7'd13;
 8'd65: block_id=7'd14;
 8'd66: block_id=7'd15;
@@ -3442,7 +3443,8 @@ function [6:0] block_id; input [5:0] r; input [1:0] p; input [1:0] noise; begin 
 8'd94: block_id=7'd64;
 8'd95: block_id=7'd65;
 8'd96: block_id=7'd66;
-8'd97: case(noise) 2'd0: block_id=7'd13; 2'd1: block_id=7'd13; 2'd2: block_id=7'd13; 2'd3: block_id=7'd13; endcase
+8'd97: block_id=7'd29;
+8'd98: case(noise) 2'd0: block_id=7'd13; 2'd1: block_id=7'd13; 2'd2: block_id=7'd13; 2'd3: block_id=7'd13; endcase
 8'd128: block_id=7'd24;
 8'd129: block_id=7'd25;
 8'd130: block_id=7'd26;
@@ -3476,7 +3478,8 @@ function [6:0] block_id; input [5:0] r; input [1:0] p; input [1:0] noise; begin 
 8'd158: block_id=7'd64;
 8'd159: block_id=7'd65;
 8'd160: block_id=7'd66;
-8'd161: case(noise) 2'd0: block_id=7'd24; 2'd1: block_id=7'd24; 2'd2: block_id=7'd24; 2'd3: block_id=7'd24; endcase
+8'd161: block_id=7'd29;
+8'd162: case(noise) 2'd0: block_id=7'd24; 2'd1: block_id=7'd24; 2'd2: block_id=7'd24; 2'd3: block_id=7'd24; endcase
 8'd192: block_id=7'd36;
 8'd193: block_id=7'd37;
 8'd194: block_id=7'd38;
@@ -3510,7 +3513,8 @@ function [6:0] block_id; input [5:0] r; input [1:0] p; input [1:0] noise; begin 
 8'd222: block_id=7'd64;
 8'd223: block_id=7'd65;
 8'd224: block_id=7'd66;
-8'd225: case(noise) 2'd0: block_id=7'd36; 2'd1: block_id=7'd36; 2'd2: block_id=7'd36; 2'd3: block_id=7'd36; endcase
+8'd225: block_id=7'd29;
+8'd226: case(noise) 2'd0: block_id=7'd36; 2'd1: block_id=7'd36; 2'd2: block_id=7'd36; 2'd3: block_id=7'd36; endcase
 default: block_id=0; endcase end endfunction
 function [7:0] name_char; input [6:0] id; input [5:0] offset; begin case(id)
 7'd0: case(offset)

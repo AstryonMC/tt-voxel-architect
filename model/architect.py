@@ -21,7 +21,7 @@ PALETTES = [
  ['prismarine','prismarine_bricks','dark_prismarine','prismarine_slab[type=top]','prismarine_bricks','chiseled_quartz_block','sea_lantern','cyan_stained_glass_pane'],
  ['deepslate_bricks','spruce_log[axis=y]','spruce_planks','deepslate_tile_slab[type=top]','spruce_planks','chiseled_deepslate','lantern[hanging=false]','gray_stained_glass_pane']]
 ROLES = ['wall','frame','roof','trim','floor','accent','light','glass']
-FIXED = ['air','cobblestone','water','gold_block','iron_bars','grass_block','dirt','stone','oak_leaves[persistent=true]','chest[facing=north]','crafting_table','furnace[facing=north]','red_bed[part=foot,facing=south]','red_bed[part=head,facing=south]','oak_door[half=lower,facing=north]','oak_door[half=upper,facing=north]','oak_trapdoor[facing=north,half=bottom,open=true]','torch','mossy_stone_bricks','cracked_stone_bricks']
+FIXED = ['air','cobblestone','water','gold_block','iron_bars','grass_block','dirt','stone','oak_leaves[persistent=true]','chest[facing=north]','crafting_table','furnace[facing=north]','red_bed[part=foot,facing=south]','red_bed[part=head,facing=south]','oak_door[half=lower,facing=north]','oak_door[half=upper,facing=north]','oak_trapdoor[facing=north,half=bottom,open=true]','torch','mossy_stone_bricks','cracked_stone_bricks','sea_lantern']
 for facing in ['north','south','east','west']:
     ROLES.append('stair_'+facing)
     for p,wood in zip(PALETTES,['dark_oak','red_sandstone','dark_prismarine','spruce']):
@@ -44,7 +44,7 @@ def programs():
             box(x,y,z,X,Y,z,r);box(x,y,Z,X,Y,Z,r)
             box(x,y,z,x,Y,Z,r);box(X,y,z,X,Y,Z,r)
         def house(x,X,z,Z,b,h):
-            box(x,b,z,X,h,Z,'wall');box(x+1,b+1,z+1,X-1,h-1,Z-1,'air')
+            box(x,b,z,X,h,Z,'floor' if arch==0 else 'wall');box(x+1,b+1,z+1,X-1,h-1,Z-1,'air')
             box(x,b,z,X,b,Z,'floor')
             ring(x,h,z,X,h,Z,'frame')
             for xx in [x,X]:
@@ -130,7 +130,7 @@ def programs():
                 box(3+i,END-2+i,3,3+i,END-2+i,END-3,'stair_west')
                 box(END-3-i,END-2+i,3,END-3-i,END-2+i,END-3,'stair_east')
             box(MID-1,3,MID-1,MID+1,3,MID+1,'gold_block');point(MID,4,MID,'gold_block')
-            for xx in [5,END-5]: point(xx,3,MID,'light')
+            for xx in [5,END-5]: point(xx,3,MID,'sea_lantern')
             for i in range(3): box(MID-1,i,i,MID+1,i,i,'stair_north')
         else:
             box(MID, E(4),MID,MID,END-1,MID,'frame')
