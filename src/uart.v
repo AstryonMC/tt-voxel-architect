@@ -3,6 +3,8 @@ module va_uart_rx #(parameter CLK_HZ=66000000, BAUD=115200)(
  input wire clk,rst_n,rx, output reg [7:0] data, output reg valid, output wire active);
  localparam DIV=CLK_HZ/BAUD;
  localparam CW=$clog2(DIV+1);
+ localparam integer HALF_DIV=DIV/2;
+ localparam [CW-1:0] RELOAD=DIV[CW-1:0]-1'b1, HALF_RELOAD=HALF_DIV[CW-1:0]-1'b1;
  reg meta,sync;
  reg [CW-1:0] count;
  reg [3:0] bitno;
@@ -14,10 +16,10 @@ module va_uart_rx #(parameter CLK_HZ=66000000, BAUD=115200)(
   else begin
    meta<=rx;sync<=meta;valid<=0;
    case(state)
-    0: if(!sync) begin count<=DIV/2-1;state<=1;end
-    1: if(count!=0) count<=count-1'b1; else if(!sync) begin count<=DIV-1;bitno<=0;state<=2;end else state<=0;
+    0: if(!sync) begin count<=HALF_RELOAD;state<=1;end
+    1: if(count!=0) count<=count-1'b1; else if(!sync) begin count<=RELOAD;bitno<=0;state<=2;end else state<=0;
     2: if(count!=0) count<=count-1'b1; else begin
-       shift[bitno[2:0]]<=sync;count<=DIV-1;
+       shift[bitno[2:0]]<=sync;count<=RELOAD;
        if(bitno==7) state<=3; else bitno<=bitno+1'b1;
        end
     3: if(count!=0) count<=count-1'b1; else begin
@@ -32,6 +34,7 @@ module va_uart_tx #(parameter CLK_HZ=66000000, BAUD=115200)(
  input wire clk,rst_n,valid,input wire [7:0] data,output wire ready,output wire tx,output wire active);
  localparam DIV=CLK_HZ/BAUD;
  localparam CW=$clog2(DIV+1);
+ localparam [CW-1:0] RELOAD=DIV[CW-1:0]-1'b1;
  reg [CW-1:0] count;
  reg [3:0] remaining;
  reg [9:0] shift;
@@ -41,8 +44,8 @@ module va_uart_tx #(parameter CLK_HZ=66000000, BAUD=115200)(
  always @(posedge clk) begin
   if(!rst_n) begin count<=0;remaining<=0;shift<=10'h3ff;end
   else if(ready) begin
-   if(valid) begin shift<={1'b1,data,1'b0};remaining<=10;count<=DIV-1;end
+   if(valid) begin shift<={1'b1,data,1'b0};remaining<=10;count<=RELOAD;end
   end else if(count!=0) count<=count-1'b1;
-  else begin shift<={1'b1,shift[9:1]};remaining<=remaining-1'b1;count<=DIV-1;end
+  else begin shift<={1'b1,shift[9:1]};remaining<=remaining-1'b1;count<=RELOAD;end
  end
 endmodule

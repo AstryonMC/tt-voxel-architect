@@ -58,6 +58,9 @@ def programs():
                 for xx in [x,X]: box(xx,b+2,zz,xx,b+3,zz,'glass')
             for i in range(4):
                 box(x-1,h+i,z-1+i,X+1,h+i,Z+1-i,'roof')
+                for xx in [x,X]:
+                    box(xx,h+i,z+i,xx,h+i,Z-i,'wall')
+                    point(xx,h+i,MID,'frame')
                 box(x-1,h+i,z-1+i,X+1,h+i,z-1+i,'stair_north')
                 box(x-1,h+i,Z+1-i,X+1,h+i,Z+1-i,'stair_south')
             box(x-1,h+4,MID,X+1,h+4,MID+1,'ridge')
@@ -116,19 +119,19 @@ def programs():
             house(E(3),E(5),E(4),E(6),1,E(5))
             for xx in [MID-3,MID+3]: point(xx,3,0,'torch')
         elif arch==3:
-            for i in range(4): box(i,i,i,END-i,i,END-i,'wall' if i%2 else 'accent')
-            box(4,4,4,END-4,4,END-4,'floor')
+            for i in range(3): box(i,i,i,END-i,i,END-i,'wall' if i%2 else 'accent')
+            box(3,2,3,END-3,2,END-3,'floor')
             for xx in [E(0,4),MID,END-4]:
                 for zz in [E(0,4),END-4]:
-                    point(xx,4,zz,'accent');box(xx,5,zz,xx,END-4,zz,'frame');point(xx,END-3,zz,'accent')
+                    point(xx,3,zz,'accent');box(xx,4,zz,xx,END-4,zz,'frame');point(xx,END-3,zz,'accent')
             box(3,END-3,3,END-3,END-3,END-3,'trim')
             for i in range(3):
                 box(3+i,END-2+i,3,END-3-i,END-2+i,END-3,'roof')
                 box(3+i,END-2+i,3,3+i,END-2+i,END-3,'stair_west')
                 box(END-3-i,END-2+i,3,END-3-i,END-2+i,END-3,'stair_east')
-            box(MID-1,4,MID-1,MID+1,4,MID+1,'gold_block');point(MID,5,MID,'gold_block')
-            for xx in [5,END-5]: point(xx,4,MID,'light')
-            for i in range(4): box(MID-1,i,i,MID+1,i,i,'stair_north')
+            box(MID-1,3,MID-1,MID+1,3,MID+1,'gold_block');point(MID,4,MID,'gold_block')
+            for xx in [5,END-5]: point(xx,3,MID,'light')
+            for i in range(3): box(MID-1,i,i,MID+1,i,i,'stair_north')
         else:
             box(MID, E(4),MID,MID,END-1,MID,'frame')
             box(MID-2,END-2,MID-1,MID+2,END-1,MID+1,'oak_leaves[persistent=true]')

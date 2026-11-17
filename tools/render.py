@@ -40,13 +40,28 @@ def color(block):
 
 def render(text,dims,path,title):
     grid,count=validate(text,dims)
-    grid={(x,y,dims[1]-1-z):b for (x,y,z),b in grid.items()}
-    scale=13;sy=scale/2;origin=(480,420)
+    occupied=len(grid)
+    fine={}
+    for (x,y,z),block in grid.items():
+        for dx in range(2):
+            for dy in range(2):
+                for dz in range(2):
+                    if '_slab[' in block and dy!=int('type=top' in block):continue
+                    if '_stairs[' in block and dy==1:
+                        high=('facing=north' in block and dz==0 or 'facing=south' in block and dz==1 or
+                              'facing=east' in block and dx==1 or 'facing=west' in block and dx==0)
+                        if not high:continue
+                    if ('_bed[' in block or block=='crafting_table' or block.startswith('chest[')) and dy==1:continue
+                    if ('glass_pane' in block or 'iron_bars' in block) and dx==1:continue
+                    if ('_door[' in block or '_trapdoor[' in block) and dz==1:continue
+                    fine[x*2+dx,y*2+dy,dims[1]*2-1-(z*2+dz)]=block
+    grid=fine
+    scale=6.5;sy=scale/2;origin=(480,420)
     def proj(x,y,z):return (origin[0]+(x-z)*scale,origin[1]+(x+z)*sy-y*scale)
     im=Image.new('RGB',(960,900),(22,28,39));d=ImageDraw.Draw(im)
     for (x,y,z),block in sorted(grid.items(),key=lambda item:(item[0][0]+item[0][2],item[0][1])):
         rgb=color(block)
-        height=.5 if 'slab[' in block else 1
+        height=1
         faces=[((0,1,0),[(x,y+height,z),(x+1,y+height,z),(x+1,y+height,z+1),(x,y+height,z+1)],1.13),
                ((1,0,0),[(x+1,y,z),(x+1,y,z+1),(x+1,y+height,z+1),(x+1,y+height,z)],.68),
                ((0,0,1),[(x,y,z+1),(x+1,y,z+1),(x+1,y+height,z+1),(x,y+height,z+1)],.85)]
@@ -60,7 +75,7 @@ def render(text,dims,path,title):
     d.text((44,75),f'{dims[0]} × {dims[1]} × {dims[2]}  |  palette 0  |  seed 1  |  {count} box commands',font=small,fill=(153,171,188))
     d.text((44,850),'SKY130  •  66 MHz  •  UART procedural architecture',font=small,fill=(153,171,188))
     im.save(path)
-    print(f'{path}: {count} commands, {len(grid)} occupied voxels, SHA256 {hashlib.sha256(text.encode()).hexdigest()[:16]}')
+    print(f'{path}: {count} commands, {occupied} occupied voxels, SHA256 {hashlib.sha256(text.encode()).hexdigest()[:16]}')
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--all',action='store_true');p.add_argument('--input',type=Path);p.add_argument('--dims',nargs=3,type=int);p.add_argument('--output',type=Path);a=p.parse_args()

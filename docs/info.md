@@ -71,8 +71,8 @@ Run test commands from the repository root except `make`, which runs in `test/`.
 UART build at production clock/baud without internal hierarchical probes.
 
 Previews in `docs/img/` are schematic voxel-color isometric drawings, not Minecraft
-screenshots. Block states are retained in output, but stairs, panes, doors and furniture
-use voxel proxies in the renderer. Slabs use half-height. Water flow and support physics
+screenshots. Stair directions and slab halves use half-voxel geometry; panes, doors and
+furniture use simplified proxies. Water flow and support physics
 are not simulated. In-game appearance still needs checking.
 
 Local hardening uses ignored `tt/` cloned from tt-support-tools and LibreLane 3.0.14:
