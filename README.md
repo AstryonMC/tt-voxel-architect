@@ -1,42 +1,61 @@
-![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
+# Voxel Architect — Tiny Tapeout sky130
 
-# Tiny Tapeout Verilog Project Template
+Procedural Minecraft Java architecture in synthesizable Verilog, targeting **66 MHz**.
+Compatible with the original `puente_lan/bot_lan.js` line protocol. No external RAM or CPU.
 
-- [Read the documentation for project](docs/info.md)
+```
+BUILD 12 12 8 1 0
+```
 
-## What is Tiny Tapeout?
+The chip replies with ordered `/fill` and `/setblock` commands, then `DONE`.
+Five architectural programs × four material palettes; seeded texture and floating terrain.
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+Every box is streamed as disjoint tiles no larger than **32 × 32 × 32** (32,768 blocks),
+including maximum-size builds. This respects Minecraft Java's default `/fill` limit
+without changing the world's `commandModificationBlockLimit`. Tile ordering preserves
+the original coarse-to-fine overwrite order.
 
-To learn more and get started, visit https://tinytapeout.com.
+The quality round raises house walls before the gable starts, seats the castle keep's roof
+on a two-storey stone hall with window rows, sills and a corbel course, adds column
+capitals and a trimmed temple pediment, and merges equal-height island terrain runs.
+Default palette-0 command counts: **77 / 54 / 262 / 51 / 291** for
+casa / spawn / castillo / templo / isla. At the bridge's 22×22×10 size the island has a
+flat grass interior with a one-block lowered edge, a four-block-deep faceted stone cone,
+three exposed trunk blocks and two rounded foliage layers. At height 14 the cone is six
+blocks deep and the tree gains a fourth exposed trunk block and a third foliage layer
+([taller preview](docs/img/isla-tall.png)); the build takes 327 commands.
 
-## Set up your Verilog project
+| Casa | Spawn |
+|---|---|
+| ![House](docs/img/casa.png) | ![Plaza](docs/img/spawn.png) |
+| Castillo | Templo |
+| ![Castle](docs/img/castillo.png) | ![Temple](docs/img/templo.png) |
 
-1. Add your Verilog files to the `src` folder.
-2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
-3. Edit [docs/info.md](docs/info.md) and add a description of your project.
-4. Adapt the testbench to your design. See [test/README.md](test/README.md) for more information.
+![Floating island](docs/img/isla.png)
 
-The GitHub action will automatically build the ASIC files using [LibreLane](https://www.zerotoasiccourse.com/terminology/librelane/).
+These are schematic previews, not Minecraft screenshots. See [the datasheet](docs/info.md)
+for pins, serial protocol, architecture, development commands and rendering limitations.
+[The specification](docs/SPEC.md) is the source of truth.
 
-## Enable GitHub actions to build the results page
+## Development
 
-- [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
+* `src/`: standard TT top, UART RX/TX, streaming parser and generated expression/material/name ROM.
+* `model/architect.py`: executable Python architectural programs and independent byte-stream evaluator.
+* `tools/compile_rom.py`: regenerate ROM; `--check` verifies it is up to date.
+* `tools/render.py --all`: command validation and isometric PNG previews.
+* `test/`: cocotb byte-for-byte physical UART comparisons, including production clock/baud and GL mode.
 
-## Resources
+```
+python -m pip install -r test/requirements.txt
+python tools/compile_rom.py --check
+python -m unittest discover -s model -p 'test_*.py'
+```
 
-- [FAQ](https://tinytapeout.com/faq/)
-- [Digital design lessons](https://tinytapeout.com/digital_design/)
-- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-- [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
-
-## What next?
-
-- [Submit your design to the next shuttle](https://app.tinytapeout.com/).
-- Edit [this README](README.md) and explain your design, how it works, and how to test it.
-- Share your project on your social network of choice:
-  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)
-  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)
-  - X (formerly Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)
-  - Bluesky [@tinytapeout.com](https://bsky.app/profile/tinytapeout.com)
+Run `make` in `test/` for the fast regression; `make REAL=yes` for a short complete build
+at 66 MHz / 115200 baud. `make GATES=yes` uses the gate-level netlist supplied by TT CI.
+The official template's GDS, test, documentation and FPGA workflows are retained.
+Maximum 255³ builds for every archetype are validated without allocating a voxel grid;
+physical-UART regressions compare a full 255³ house, a 255×255 platform and a 40³ house.
+See [verification results](docs/verification.md) for synthesis comparisons and limitations.
+Hardening is delegated to the PR's GitHub Actions `gds` job; do not start local hardening
+on the two-core development box.
