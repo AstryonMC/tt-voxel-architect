@@ -16,10 +16,14 @@ without changing the world's `commandModificationBlockLimit`. Tile ordering pres
 the original coarse-to-fine overwrite order.
 
 The quality round raises house walls before the gable starts, seats the castle keep's roof
-on its hall, adds column capitals and a trimmed temple pediment, and merges equal-height
-island terrain runs. Default palette-0 command counts: **77 / 54 / 244 / 51 / 365** for
-casa / spawn / castillo / templo / isla. The island has a smooth coarse-height top, a
-tapered stone underside and a separate log-and-layered-leaf tree.
+on a two-storey stone hall with window rows, sills and a corbel course, adds column
+capitals and a trimmed temple pediment, and merges equal-height island terrain runs.
+Default palette-0 command counts: **77 / 54 / 261 / 51 / 291** for
+casa / spawn / castillo / templo / isla. At the bridge's 22×22×10 size the island has a
+flat grass interior with a one-block lowered edge, a four-block-deep faceted stone cone,
+three exposed trunk blocks and two rounded foliage layers. At height 14 the cone is six
+blocks deep and the tree gains a fourth exposed trunk block and a third foliage layer
+([taller preview](docs/img/isla-tall.png)); the build takes 327 commands.
 
 | Casa | Spawn |
 |---|---|

@@ -9,7 +9,7 @@ formatter and a UART generate the byte stream.
 Five archetypes: casa (house), spawn (monumental plaza), castillo (castle), templo (temple),
 isla (floating island). Four palettes: medieval stone/oak, desert sandstone, ocean
 prismarine, dark/spruce. Details include directional stair roofs and slab ridges, log
-frames, glazing, furniture, column capitals, battlements, lamps and coarse terrain variation.
+frames, glazing, furniture, column capitals, battlements, lamps and a faceted floating island.
 
 Inputs RX and START have two-flop synchronizers; reset is synchronous active-low. The
 UART midpoint-samples eight data bits and checks the stop bit. Default divisor is 572
@@ -19,8 +19,12 @@ maximum coordinates and configuration. A nine-cycle parameter unit precomputes a
 fractions by repeated addition into a small register file. Six ROM expressions per box
 select these fractions, add a signed offset and register the result. Motif repeats are compiler
 unrolled, while island columns use a runtime nested loop that merges equal-height Z runs.
-Grass variation uses eight-block patches; Manhattan distance tapers the underside toward
-the center. A seeded LFSR supplies architectural texture.
+The island's grass interior is level, with a one-block lowered edge. Half the maximum
+X/Z distance from the center tapers its faceted underside to a single stone tip. A seeded
+LFSR supplies architectural texture. The bridge's 22×22×10 island has a four-block
+underside, three exposed trunk blocks and two canopy layers; height 14 grows these to
+six blocks, four trunk blocks and three canopy layers. Both remain below 400 commands.
+All START-button defaults remain unchanged, including the height-10 island.
 Before formatting, each box is partitioned into disjoint tiles of at most 32 blocks on
 each axis, guaranteeing at most 32,768 blocks per `/fill` without multipliers or dividers.
 All tiles of one box complete before the next microinstruction changes the material/RNG.
@@ -79,7 +83,7 @@ UART build at production clock/baud without internal hierarchical probes.
 Previews in `docs/img/` are schematic voxel-color isometric drawings, not Minecraft
 screenshots. A quarter-block grid shows stair treads, slab halves, thin panes/doors and
 small lantern bodies; furniture uses simplified proxies. The island uses a lower camera
-angle to reveal its underside. Water flow and support physics
+angle to reveal its underside. Empty scenes render a labeled image. Water flow and support physics
 are not simulated. In-game appearance still needs checking.
 
 Hardening runs in the PR's GitHub Actions `gds` job, not locally on the two-core development
